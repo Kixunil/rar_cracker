@@ -1,4 +1,7 @@
 extern crate unrar;
+extern crate rayon;
+
+use rayon::prelude::*;
 
 fn try_archive(file: &str, password: &str) -> bool {
     use unrar::archive::Archive;
@@ -77,12 +80,21 @@ impl<'a> Iterator for BruteForceGen<'a> {
 }
 
 fn main() {
-    //let password_list = vec!["Apple", "orange", "parketbar", "nbusr123", "progressbar", "raspberry"];
     let alphabet = ['h', 'e', 'l', 'o'];
-    let password_list = BruteForceGen::new(&alphabet, 5);
-    let result = crack_rar(password_list);
+    let result = alphabet
+        .par_iter()
+        .map(|c| {
+            let password_list = BruteForceGen::new(&alphabet, 4);
+            let mapped = password_list.map(|mut passwd| {
+                passwd.push(*c);
+                passwd
+            });
+            crack_rar(mapped)
+        })
+        .find_any(Option::is_some);
+
     match result {
-        Some(password) => println!("Password is: {}", password),
-        None => println!("Password not found"),
+        Some(Some(password)) => println!("Password is: {}", password),
+        _ => println!("Password not found"),
     }
 }

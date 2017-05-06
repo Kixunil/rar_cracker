@@ -5,3 +5,4 @@ authors = ["Martin Habovštiak <martin.habovstiak@gmail.com>"]
 
 [dependencies]
 unrar = "0.4.2"
+rayon = "0.7.0"
